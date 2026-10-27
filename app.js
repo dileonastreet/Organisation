@@ -341,7 +341,7 @@
     link.addEventListener('click', (event) => {
       event.preventDefault();
       const destination = link.dataset.nav;
-      const targets = { overview: '#overview', clients: '#customerList', cities: '#citySummarySection', exports: '#exportsPanel' };
+      const targets = { clients: '#overview' };
       showWorkspace(destination, targets[destination]);
       if (destination !== 'calculator' && location.hash !== link.hash) history.replaceState(null, '', link.hash);
       if (destination === 'calculator') history.replaceState(null, '', '#calculatorView');
