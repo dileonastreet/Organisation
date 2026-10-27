@@ -1,58 +1,130 @@
 <!doctype html>
-<html lang="fr" dir="ltr">
+<html lang="fr">
 <head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Carnet clients — Organisation et export Excel</title>
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-<script src="https://cdn.jsdelivr.net/npm/exceljs@4.4.0/dist/exceljs.min.js"></script>
-<style>
-:root{--ink:#18352a;--green:#176b51;--mint:#e9f5ef;--line:#e1ebe5;--muted:#708078;--bg:#f5f8f6}*{box-sizing:border-box}body{font-family:Inter,system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--ink)}.navbar{background:#fff;border-bottom:1px solid var(--line)}.logo{width:40px;height:40px;border-radius:13px;background:var(--green);color:#fff;display:grid;place-items:center;font-weight:700;font-size:20px}.wrap{max-width:1160px}.hero{padding:36px 0 24px}.hero h1{font-size:clamp(1.7rem,4vw,2.25rem);font-weight:700;letter-spacing:-.04em}.hero p{color:var(--muted);line-height:1.9;max-width:780px}.cardx{background:#fff;border:1px solid var(--line);border-radius:17px;box-shadow:0 4px 18px #173a280a}.cardhead{padding:18px 21px;border-bottom:1px solid var(--line)}.cardbody{padding:21px}.form-control,.form-select{border-color:#d9e5dd;border-radius:11px;padding:.7rem .85rem}.form-control:focus,.form-select:focus{border-color:#70b89b;box-shadow:0 0 0 .2rem #176b5118}.form-label{font-weight:600}.btn-success{background:var(--green);border-color:var(--green)}.btn-success:hover{background:#10563f;border-color:#10563f}.hint{font-size:.87rem;color:var(--muted);line-height:1.75}.metric{padding:14px 16px;border-radius:13px;background:#f6faf7;height:100%}.metric strong{font-size:1.45rem;display:block}.table thead th{white-space:nowrap;background:#f5f8f6;color:#506158;font-size:.9rem}.table td{vertical-align:middle}.city-tag{background:var(--mint);color:var(--green);padding:4px 10px;border-radius:99px;white-space:nowrap}.subtle{color:var(--muted)}.alert-local{background:#eff7f2;border:1px solid #d4e8dc;color:#315842;border-radius:12px;padding:12px 15px}.empty{padding:34px 10px;text-align:center;color:var(--muted)}.footer{padding:25px 0 40px;color:var(--muted);font-size:.84rem}.export-note{font-size:.82rem;color:#52715f}
-</style></head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#071523">
+  <meta name="description" content="Calculateur de prix de vente, TVA publicitaire et bénéfice net par quantité.">
+  <title>Marge Studio — Calculateur de prix de vente</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="./styles.css">
+  <script src="./app.js" defer></script>
+</head>
 <body>
-<nav class="navbar"><div class="container wrap py-2 d-flex align-items-center gap-2"><div class="logo">C</div><div><div class="fw-bold">Carnet clients</div><div class="small text-secondary">Organisation par ville et par taille</div></div><span class="badge rounded-pill text-bg-light border ms-auto">Traitement local</span></div></nav>
-<main class="container wrap">
-<header class="hero"><h1>Organisez vos clients dans un fichier Excel</h1><p>Ajoutez les informations de vos clients ou importez un fichier. Consultez les effectifs par ville, les coordonnées et les tailles achetées, puis téléchargez un classeur Excel clair et prêt à utiliser.</p></header>
-<div class="alert-local mb-4"><strong>Confidentialité :</strong> les données sont traitées dans votre navigateur et ne sont pas envoyées au serveur de cette page. N’utilisez que des informations que vous êtes autorisé à conserver et protégez le fichier Excel téléchargé.</div>
-<div class="row g-4">
-<div class="col-lg-5">
-<section class="cardx mb-4"><div class="cardhead"><h2 class="h5 mb-0">Ajouter un client</h2></div><div class="cardbody">
-<form id="customerForm"><div class="mb-3"><label class="form-label" for="name">Nom du client</label><input class="form-control" id="name" placeholder="Ex. : Sarah Martin" required></div><div class="mb-3"><label class="form-label" for="phone">Téléphone</label><input class="form-control" id="phone" placeholder="Ex. : +33 6 12 34 56 78" required></div><div class="mb-3"><label class="form-label" for="city">Ville</label><input class="form-control" id="city" placeholder="Ex. : Lyon" required></div><div class="mb-3"><label class="form-label" for="sizes">Tailles achetées</label><input class="form-control" id="sizes" placeholder="Ex. : M, L ou 38, 40" required><div class="hint mt-1">Séparez les différentes tailles par une virgule.</div></div><button class="btn btn-success w-100" type="submit">Ajouter à la liste</button></form>
-</div></section>
-<section class="cardx"><div class="cardhead"><h2 class="h5 mb-0">Importer ou coller des données</h2></div><div class="cardbody"><label for="importFile" class="form-label">Importer un fichier Excel ou CSV</label><input id="importFile" class="form-control" type="file" accept=".xlsx,.xls,.csv,text/csv"><div class="hint mt-2 mb-3">Colonnes attendues : Nom, Téléphone, Ville, Tailles. Vous pouvez aussi coller plusieurs lignes ci-dessous.</div><label for="bulkData" class="form-label">Coller plusieurs clients</label><textarea id="bulkData" class="form-control" rows="5" placeholder="Nom&#9;Téléphone&#9;Ville&#9;Tailles&#10;Sarah Martin&#9;+33612345678&#9;Lyon&#9;M, L"></textarea><div class="d-flex gap-2 mt-3"><button id="addBulk" class="btn btn-outline-success flex-grow-1" type="button">Ajouter les lignes</button><button id="sampleBtn" class="btn btn-outline-secondary" type="button">Exemple</button></div></div></section>
-</div>
-<div class="col-lg-7">
-<section class="cardx mb-4"><div class="cardhead d-flex flex-wrap align-items-center gap-2"><h2 class="h5 mb-0">Vue d’ensemble</h2><button id="exportBtn" class="btn btn-success btn-sm ms-auto">Télécharger le rapport complet Excel</button><button id="phonesBtn" class="btn btn-outline-success btn-sm">Télécharger les numéros seuls</button><button id="clearBtn" class="btn btn-outline-secondary btn-sm">Tout effacer</button></div><div class="cardbody"><div class="row g-3"><div class="col-4"><div class="metric"><span class="hint">Clients au total</span><strong id="totalCount">0</strong></div></div><div class="col-4"><div class="metric"><span class="hint">Villes</span><strong id="cityCount">0</strong></div></div><div class="col-4"><div class="metric"><span class="hint">Tailles distinctes</span><strong id="sizeCount">0</strong></div></div></div><div class="mt-4"><h3 class="h6 fw-bold">Nombre de clients par ville</h3><div class="table-responsive"><table class="table table-sm align-middle mb-0"><thead><tr><th>Ville</th><th>Nombre de clients</th><th>Tailles enregistrées</th></tr></thead><tbody id="citySummary"></tbody></table></div></div></div></section>
-<section class="cardx"><div class="cardhead d-flex flex-wrap align-items-center gap-2"><h2 class="h5 mb-0">Liste des clients</h2><select id="cityFilter" class="form-select form-select-sm" style="width:auto;min-width:160px"><option value="">Toutes les villes</option></select><input id="search" class="form-control form-control-sm" style="width:auto;min-width:190px" placeholder="Rechercher un nom ou numéro"></div><div class="table-responsive"><table class="table table-hover mb-0"><thead><tr><th>Nom</th><th>Téléphone</th><th>Ville</th><th>Tailles achetées</th><th></th></tr></thead><tbody id="customerRows"></tbody></table></div><div id="emptyState" class="empty">Aucun client pour le moment. Ajoutez un client ou importez un fichier.</div></section>
-</div></div><footer class="footer">Carnet clients — vos données restent dans votre navigateur. L’export génère un classeur Excel mis en forme, avec des onglets dédiés.</footer></main>
-<script>
-(()=>{
-const $=id=>document.getElementById(id);let customers=[];
-const clean=v=>String(v??'').trim();
-function esc(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
-function addCustomer(c){const name=clean(c.name),phone=clean(c.phone),city=clean(c.city),sizes=clean(c.sizes);if(!name||!phone||!city||!sizes)return false;customers.push({name,phone,city,sizes});return true}
-function splitSizes(v){return v.split(/[,;\/]+/).map(x=>x.trim()).filter(Boolean)}
-function render(){const cities=[...new Set(customers.map(c=>c.city))].sort((a,b)=>a.localeCompare(b,'fr'));const sizeSet=new Set(customers.flatMap(c=>splitSizes(c.sizes)));$('totalCount').textContent=customers.length;$('cityCount').textContent=cities.length;$('sizeCount').textContent=sizeSet.size;
- const selected=$('cityFilter').value;$('cityFilter').innerHTML='<option value="">Toutes les villes</option>'+cities.map(c=>`<option value="${esc(c)}">${esc(c)}</option>`).join('');if(cities.includes(selected))$('cityFilter').value=selected;
- const groups=new Map();for(const c of customers){if(!groups.has(c.city))groups.set(c.city,{n:0,s:new Set()});const g=groups.get(c.city);g.n++;splitSizes(c.sizes).forEach(x=>g.s.add(x))}
- $('citySummary').innerHTML=cities.length?cities.map(city=>{const g=groups.get(city);return `<tr><td><span class="city-tag">${esc(city)}</span></td><td>${g.n}</td><td>${[...g.s].sort((a,b)=>a.localeCompare(b,'fr')).map(esc).join(', ')||'—'}</td></tr>`}).join(''):'<tr><td colspan="3" class="subtle text-center py-3">Aucune donnée pour le moment</td></tr>';
- const query=clean($('search').value).toLocaleLowerCase('fr');const filtered=customers.filter(c=>(!selected||c.city===selected)&&(!query||`${c.name} ${c.phone}`.toLocaleLowerCase('fr').includes(query))).sort((a,b)=>a.city.localeCompare(b.city,'fr')||a.name.localeCompare(b.name,'fr'));
- $('customerRows').innerHTML=filtered.map(c=>`<tr><td>${esc(c.name)}</td><td dir="ltr">${esc(c.phone)}</td><td>${esc(c.city)}</td><td>${esc(c.sizes)}</td><td><button class="btn btn-sm btn-outline-danger" data-remove="${customers.indexOf(c)}" aria-label="Supprimer">Supprimer</button></td></tr>`).join('');$('emptyState').style.display=customers.length?'none':'block';document.querySelectorAll('[data-remove]').forEach(b=>b.onclick=()=>{customers.splice(Number(b.dataset.remove),1);render()});}
-$('customerForm').addEventListener('submit',e=>{e.preventDefault();if(addCustomer({name:$('name').value,phone:$('phone').value,city:$('city').value,sizes:$('sizes').value})){e.target.reset();render()}else alert('Veuillez renseigner tous les champs.')});
-$('addBulk').onclick=()=>{const text=$('bulkData').value.trim();if(!text)return;let rows=text.split(/\r?\n/).filter(Boolean),added=0;for(const row of rows){const cols=row.includes('\t')?row.split('\t'):row.split(/[;,]/);if(cols.length<4)continue;const vals=cols.map(clean);if(/^(nom|name|customer name)$/i.test(vals[0]))continue;if(addCustomer({name:vals[0],phone:vals[1],city:vals[2],sizes:vals.slice(3).join(', ')}))added++}render();alert(`${added} client(s) ajouté(s).`)};
-$('sampleBtn').onclick=()=>{$('bulkData').value='Nom\tTéléphone\tVille\tTailles\nSarah Martin\t+33612345678\tLyon\tM, L\nYassine Dupont\t+33611111111\tMarseille\t42\nMarie Bernard\t+33622222222\tLyon\tS, M'};
-$('importFile').addEventListener('change',async e=>{const f=e.target.files[0];if(!f)return;try{const buf=await f.arrayBuffer();let rows;if(f.name.toLowerCase().endsWith('.csv')){const text=new TextDecoder('utf-8').decode(buf);rows=text.split(/\r?\n/).filter(Boolean).map(line=>line.split(/[;,\t]/).map(v=>v.replace(/^\s*"|"\s*$/g,'').trim()))}else{if(!window.ExcelJS)throw Error('Excel indisponible');const wb=new ExcelJS.Workbook();await wb.xlsx.load(buf);const sh=wb.worksheets[0];rows=sh.getSheetValues().slice(1).filter(Boolean).map(r=>r.slice(1).map(v=>String(v??'')))}if(!rows.length)throw Error('Fichier vide');const heads=rows[0].map(x=>clean(x).toLocaleLowerCase('fr'));let ix={name:heads.findIndex(x=>['nom','nom du client','name','customer','customer name'].includes(x)),phone:heads.findIndex(x=>['téléphone','telephone','numéro de téléphone','phone','mobile'].includes(x)),city:heads.findIndex(x=>['ville','city'].includes(x)),sizes:heads.findIndex(x=>['tailles','taille','sizes','size','tailles achetées'].includes(x))};if(Object.values(ix).some(i=>i<0))ix={name:0,phone:1,city:2,sizes:3};let added=0;for(const r of rows.slice(1)){if(addCustomer({name:r[ix.name],phone:r[ix.phone],city:r[ix.city],sizes:r[ix.sizes]}))added++}render();alert(`${added} client(s) importé(s).`)}catch(err){alert('Impossible de lire ce fichier. Vérifiez les colonnes : Nom, Téléphone, Ville, Tailles.')}e.target.value=''});
-$('phonesBtn').onclick=()=>{if(!customers.length){alert('Ajoutez ou importez d’abord des clients.');return}const phones=customers.map(c=>c.phone.trim()).filter(Boolean);if(!phones.length){alert('Aucun numéro à télécharger.');return}const content='Téléphone\r\n'+phones.map(p=>'"'+p.replaceAll('"','""')+'"').join('\r\n');const blob=new Blob(['\ufeff'+content],{type:'text/csv;charset=utf-8'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download='Numeros_de_telephone.csv';a.click();setTimeout(()=>URL.revokeObjectURL(url),1500)};
- $('cityFilter').onchange=render;$('search').oninput=render;
-$('clearBtn').onclick=()=>{if(customers.length&&confirm('Voulez-vous vraiment supprimer tous les clients de cette page ?')){customers=[];render()}};
-function styleHeader(row){row.height=25;row.eachCell(cell=>{cell.font={name:'Aptos',size:11,bold:true,color:{argb:'FFFFFFFF'}};cell.fill={type:'pattern',pattern:'solid',fgColor:{argb:'FF176B51'}};cell.alignment={vertical:'middle',horizontal:'left'};cell.border={bottom:{style:'thin',color:{argb:'FF145640'}}}})}
-function setupSheet(ws,widths){ws.views=[{state:'frozen',ySplit:4}];ws.autoFilter={from:{row:4,column:1},to:{row:4,column:ws.columnCount}};ws.columns.forEach((c,i)=>{c.width=widths[i]||18});ws.eachRow((row,n)=>{if(n>4){row.height=22;row.eachCell(cell=>{cell.font={name:'Aptos',size:10,color:{argb:'FF263B31'}};cell.alignment={vertical:'middle',horizontal:'left'};if(n%2===1)cell.fill={type:'pattern',pattern:'solid',fgColor:{argb:'FFF3F7F4'}};cell.border={bottom:{style:'hair',color:{argb:'FFE1EBE5'}}}})}})}
-function addTitle(ws,title,subtitle,lastCol){ws.mergeCells(1,1,1,lastCol);ws.getCell(1,1).value=title;ws.getCell(1,1).font={name:'Aptos Display',size:18,bold:true,color:{argb:'FFFFFFFF'}};ws.getCell(1,1).fill={type:'pattern',pattern:'solid',fgColor:{argb:'FF18352A'}};ws.getCell(1,1).alignment={vertical:'middle',horizontal:'left',indent:1};ws.getRow(1).height=36;ws.mergeCells(2,1,2,lastCol);ws.getCell(2,1).value=subtitle;ws.getCell(2,1).font={name:'Aptos',size:10,italic:true,color:{argb:'FF63766B'}};ws.getRow(2).height=23;ws.getCell(3,1).value='Généré le';ws.getCell(3,2).value=new Date();ws.getCell(3,2).numFmt='dd/mm/yyyy hh:mm';ws.getCell(3,1).font={name:'Aptos',size:9,bold:true,color:{argb:'FF63766B'}};ws.getCell(3,2).font={name:'Aptos',size:9,color:{argb:'FF63766B'}}}
-$('exportBtn').onclick=async()=>{if(!customers.length){alert('Ajoutez d’abord des clients.');return}if(!window.ExcelJS){alert('La bibliothèque Excel n’est pas disponible. Vérifiez votre connexion Internet puis rechargez la page.');return}try{const wb=new ExcelJS.Workbook();wb.creator='Carnet clients';wb.subject='Répertoire clients par ville et tailles achetées';wb.title='Carnet clients — Synthèse et répertoire';wb.created=new Date();wb.modified=new Date();wb.properties.date1904=false;
- const byCity={};customers.forEach(c=>{byCity[c.city]??={count:0,sizes:new Set()};byCity[c.city].count++;splitSizes(c.sizes).forEach(s=>byCity[c.city].sizes.add(s))});
- const s1=wb.addWorksheet('Synthèse par ville',{properties:{tabColor:'176B51'}});addTitle(s1,'CARNET CLIENTS — SYNTHÈSE PAR VILLE','Vue d’ensemble des clients et des tailles enregistrées',3);s1.addRow(['Ville','Nombre de clients','Tailles achetées']);s1.addRow([]);styleHeader(s1.getRow(4));Object.keys(byCity).sort((a,b)=>a.localeCompare(b,'fr')).forEach(city=>s1.addRow([city,byCity[city].count,[...byCity[city].sizes].sort((a,b)=>a.localeCompare(b,'fr')).join(', ')]));s1.addRow([]);const totalRow=s1.addRow(['TOTAL',customers.length,`${new Set(customers.flatMap(c=>splitSizes(c.sizes))).size} tailles distinctes`]);totalRow.font={name:'Aptos',bold:true,color:{argb:'FF18352A'}};totalRow.getCell(1).border={top:{style:'medium',color:{argb:'FF176B51'}}};setupSheet(s1,[30,22,52]);
- const s2=wb.addWorksheet('Répertoire clients',{properties:{tabColor:'3B82A0'}});addTitle(s2,'RÉPERTOIRE CLIENTS','Coordonnées et tailles achetées — triées par ville puis par nom',4);s2.addRow(['Ville','Nom du client','Téléphone','Tailles achetées']);s2.addRow([]);styleHeader(s2.getRow(4));[...customers].sort((a,b)=>a.city.localeCompare(b.city,'fr')||a.name.localeCompare(b.name,'fr')).forEach(c=>{const r=s2.addRow([c.city,c.name,c.phone,c.sizes]);r.getCell(3).numFmt='@'});setupSheet(s2,[28,30,24,30]);
- const sizeCounts={};customers.forEach(c=>splitSizes(c.sizes).forEach(size=>{sizeCounts[size]??={orders:0,clients:new Set()};sizeCounts[size].orders++;sizeCounts[size].clients.add(c.phone)}));const s3=wb.addWorksheet('Analyse des tailles',{properties:{tabColor:'D39B32'}});addTitle(s3,'ANALYSE DES TAILLES','Fréquence des tailles figurant dans les achats saisis',3);s3.addRow(['Taille','Nombre d’occurrences','Nombre de clients']);s3.addRow([]);styleHeader(s3.getRow(4));Object.keys(sizeCounts).sort((a,b)=>a.localeCompare(b,'fr',{numeric:true})).forEach(size=>s3.addRow([size,sizeCounts[size].orders,sizeCounts[size].clients.size]));setupSheet(s3,[24,26,22]);
- const buf=await wb.xlsx.writeBuffer();const blob=new Blob([buf],{type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download='Carnet_clients_rapport.xlsx';a.click();setTimeout(()=>URL.revokeObjectURL(url),1500)}catch(err){console.error(err);alert('La création du fichier Excel a échoué. Réessayez après avoir rechargé la page.')}};
-render();
-})();
-</script></body></html>
+  <div class="app-shell">
+    <aside class="sidebar" aria-label="Navigation principale">
+      <a class="brand" href="#top" aria-label="Marge Studio, accueil">
+        <span class="brand-mark" aria-hidden="true">
+          <svg viewBox="0 0 48 48"><path d="M8 13.5A5.5 5.5 0 0 1 13.5 8h20L41 15.5v19a5.5 5.5 0 0 1-5.5 5.5h-22A5.5 5.5 0 0 1 8 34.5z"/><circle cx="31.5" cy="16.5" r="2.5"/><path d="M13 25h15v11H13zM16 28h2m4 0h2m-8 4h2m4 0h2"/></svg>
+        </span>
+        <span class="brand-name">MARGE<br>STUDIO</span>
+      </a>
+      <div class="nav-caption">ESPACE COMMERÇANT</div>
+      <nav class="side-nav">
+        <a class="nav-link active" href="#calculator" aria-current="page">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="3" width="14" height="18" rx="2"/><path d="M8 7h8M8 11h2m4 0h2m-8 4h2m4 0h2m-8 3h2m4 0h2"/></svg>
+          <span>Calculateur</span>
+        </a>
+        <a class="nav-link" href="#quantity-summary">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7.5 12 3l8 4.5v9L12 21l-8-4.5z"/><path d="m4.5 7.8 7.5 4.4 7.5-4.4M12 12.2V21"/></svg>
+          <span>Synthèse des quantités</span>
+        </a>
+      </nav>
+      <div class="sidebar-bottom">
+        <span class="sidebar-line"></span>
+        <p>LES CHIFFRES<br>CLAIRS.<br>LES DÉCISIONS<br>JUSTES.</p>
+      </div>
+    </aside>
+
+    <main class="main-content" id="top">
+      <header class="topbar">
+        <div class="topbar-label"><span class="live-dot"></span> Calcul en temps réel</div>
+        <div class="topbar-right">
+          <label class="currency-control" for="currency">
+            <span>Devise</span>
+            <select id="currency" aria-label="Choisir la devise">
+              <option value="MAD" selected>MAD — Dirham</option>
+              <option value="EUR">EUR — Euro</option>
+              <option value="USD">USD — Dollar</option>
+            </select>
+          </label>
+          <button class="icon-button" id="resetButton" type="button" title="Réinitialiser les valeurs" aria-label="Réinitialiser les valeurs">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12a9 9 0 1 0 2.64-6.36L3 8"/><path d="M3 3v5h5"/><path d="M12 7v5l3 2"/></svg>
+          </button>
+        </div>
+      </header>
+
+      <section class="page-heading" id="calculator">
+        <div>
+          <div class="eyebrow"><span class="eyebrow-icon">↗</span> OUTIL DE MARGE COMMERCIALE</div>
+          <h1>Calculateur de <span>prix de vente</span></h1>
+          <p>Maîtrisez vos coûts. Fixez votre marge.</p>
+        </div>
+        <div class="example-badge"><span class="example-dot"></span> Valeurs d’exemple</div>
+      </section>
+
+      <section class="input-panel panel" aria-labelledby="inputs-title">
+        <div class="section-heading">
+          <div class="heading-icon settings-icon" aria-hidden="true">✳</div>
+          <div>
+            <h2 id="inputs-title">Paramètres par pièce</h2>
+            <p>Renseignez vos coûts et votre bénéfice cible.</p>
+          </div>
+          <div class="vat-chip"><span class="vat-symbol">%</span><span>TVA sur la publicité <strong>20&nbsp;%</strong></span><span class="vat-divider"></span><span>TVA estimée <strong id="vatAmount">—</strong></span></div>
+        </div>
+
+        <div class="input-grid">
+          <div class="field-card">
+            <div class="field-top"><span class="field-icon cube-icon" aria-hidden="true">◇</span><label for="purchaseCost">Achat en gros / pièce</label></div>
+            <div class="input-wrap"><input id="purchaseCost" type="number" min="0" step="0.01" inputmode="decimal" value="120" autocomplete="off"><span class="input-currency" data-currency>MAD</span></div>
+          </div>
+          <div class="field-card">
+            <div class="field-top"><span class="field-icon ad-icon" aria-hidden="true">◖</span><label for="adCost">Publicité / commande <small>avant TVA</small></label></div>
+            <div class="input-wrap"><input id="adCost" type="number" min="0" step="0.01" inputmode="decimal" value="25" autocomplete="off"><span class="input-currency" data-currency>MAD</span></div>
+          </div>
+          <div class="field-card">
+            <div class="field-top"><span class="field-icon delivery-icon" aria-hidden="true">▱</span><label for="deliveryCost">Livraison / pièce</label></div>
+            <div class="input-wrap"><input id="deliveryCost" type="number" min="0" step="0.01" inputmode="decimal" value="20" autocomplete="off"><span class="input-currency" data-currency>MAD</span></div>
+          </div>
+          <div class="field-card">
+            <div class="field-top"><span class="field-icon profit-icon" aria-hidden="true">▥</span><label for="targetProfit">Bénéfice net souhaité</label></div>
+            <div class="input-wrap"><input id="targetProfit" type="number" min="0" step="0.01" inputmode="decimal" value="50" autocomplete="off"><span class="input-currency" data-currency>MAD</span></div>
+          </div>
+        </div>
+        <p class="assumption-note"><span aria-hidden="true">ⓘ</span> Calcul basé sur une pièce par commande. La TVA de 20&nbsp;% s’applique uniquement au coût publicitaire.</p>
+      </section>
+
+      <section class="price-card" aria-live="polite" aria-atomic="true">
+        <div class="price-orb" aria-hidden="true"><svg viewBox="0 0 48 48"><path d="M7 22V9a2 2 0 0 1 2-2h13l19 19a3 3 0 0 1 0 4L30 41a3 3 0 0 1-4 0L7 22Z"/><circle cx="16" cy="16" r="2.4"/></svg></div>
+        <div class="price-main"><div class="price-label">PRIX DE VENTE CONSEILLÉ / PIÈCE</div><div class="price-value"><span id="salePrice">—</span><span class="price-currency" data-currency>MAD</span></div></div>
+        <div class="price-divider"></div>
+        <div class="price-mini"><span>PUBLICITÉ HT</span><strong id="adBeforeVatResult">—</strong></div>
+        <div class="price-mini"><span>PUBLICITÉ TTC</span><strong id="adAfterVatResult">—</strong></div>
+        <div class="formula-box"><div class="formula-label"><span class="formula-symbol">∑</span> DÉTAIL DU CALCUL</div><p id="formulaText">—</p></div>
+      </section>
+
+      <section class="summary-panel panel" id="quantity-summary" aria-labelledby="summary-title">
+        <div class="summary-header">
+          <div class="summary-heading">
+            <div class="heading-icon bars-icon" aria-hidden="true">▥</div>
+            <div><h2 id="summary-title">Projection par quantité</h2><p>Comparez vos ventes et bénéfices selon le volume.</p></div>
+          </div>
+          <button class="add-quantity" id="addQuantityButton" type="button"><span aria-hidden="true">＋</span> Ajouter une quantité</button>
+        </div>
+        <div class="table-scroll">
+          <table class="quantity-table">
+            <thead><tr>
+              <th scope="col">Quantité</th><th scope="col">Prix de vente</th><th scope="col">Pub. HT</th><th scope="col">Pub. TTC</th><th scope="col">Livraison</th><th scope="col">Coût total</th><th scope="col">Ventes totales</th><th scope="col">Bénéfice net</th><th scope="col"><span class="sr-only">Action</span></th>
+            </tr></thead>
+            <tbody id="quantityRows"></tbody>
+          </table>
+        </div>
+        <div class="summary-footer"><span class="footer-mark"></span> Le bénéfice affiché correspond au bénéfice cible saisi, avant éventuelles autres charges.</div>
+      </section>
+      <footer class="page-footer"><span>MARGE STUDIO</span><span>Vos calculs restent dans ce navigateur.</span><button type="button" class="text-reset" id="resetLink">Réinitialiser les valeurs</button></footer>
+    </main>
+  </div>
+</body>
+</html>
