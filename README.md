@@ -20,6 +20,8 @@ Pour saisir plusieurs clients, collez des lignes tabulées, ou importez un `.xls
 
 Le classeur Excel contient une synthèse des villes, un répertoire complet trié par ville, les tailles détaillées par client, une analyse des tailles et un onglet distinct par ville. Il peut aussi être créé avant l’ajout de clients ; le classeur est alors vide. Sur téléphone, une fenêtre propose un lien « Télécharger » et, si le navigateur le prend en charge, le partage pour enregistrer le fichier dans l’app Fichiers. L’export des numéros télécharge uniquement les téléphones, un par ligne, en fichier `.txt`.
 
+Sur téléphone, la navigation passe en haut et les listes clients, villes et projections se transforment en cartes verticales : la page reste limitée à la largeur de l’écran, sans barre de défilement horizontale globale. Sur ordinateur, les tables conservent leur présentation en colonnes.
+
 ## Calculateur
 
 L’onglet « Calculateur » conserve la fonction de tarification : coût d’achat de gros, publicité par commande hors TVA, livraison et bénéfice net cible par pièce. La TVA de 20 % s’applique au coût publicitaire ; le calcul suppose une pièce par commande. La devise MAD, EUR ou USD, les projections par quantité, l’ajout/suppression de quantités et la réinitialisation sont disponibles.
