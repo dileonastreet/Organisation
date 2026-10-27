@@ -757,10 +757,6 @@
   }
 
   async function exportWorkbook() {
-    if (!customers.length) {
-      showToast('Ajoutez ou importez des clients avant de créer le rapport Excel.', 'error');
-      return;
-    }
     if (!window.ExcelJS) {
       showToast('La bibliothèque Excel locale n’a pas pu être chargée. Rechargez la page.', 'error');
       return;
@@ -865,7 +861,7 @@ Map();
       workbook.calcProperties.forceFullCalc = true;
       const buffer = await workbook.xlsx.writeBuffer();
       downloadBlob(buffer, `Marge_Studio_Clients_${new Date().toISOString().slice(0, 10)}.xlsx`, 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-      showToast('Le classeur Excel complet a été téléchargé.');
+      showToast(customers.length ? 'Votre classeur Excel est prêt.' : 'Un classeur Excel vide est prêt ; ajoutez des clients pour le compléter.');
     } catch (error) {
       console.error('Création du classeur Excel impossible.', error);
       showToast('La création Excel a échoué. Réessayez après avoir rechargé la page.', 'error');
@@ -875,8 +871,59 @@ Map();
     }
   }
 
+  let activeDownloadUrl = null;
+
+  function showFileReady(blob, filename) {
+    let dialog = $('#fileReadyDialog');
+    if (!dialog) {
+      dialog = document.createElement('dialog');
+      dialog.id = 'fileReadyDialog';
+      dialog.className = 'file-ready-dialog';
+      dialog.setAttribute('aria-labelledby', 'fileReadyTitle');
+      dialog.innerHTML = '<div class="file-ready-card"><span class="file-ready-mark" aria-hidden="true">✓</span><h2 id="fileReadyTitle">Votre fichier est prêt</h2><p class="file-ready-name"></p><p class="file-ready-help">Sur iPhone, touchez « Télécharger » ou « Partager / Enregistrer » pour sauvegarder le fichier dans l’app Fichiers.</p><div class="file-ready-actions"><a class="primary-action file-ready-download" data-file-download>⇩ Télécharger</a><button class="secondary-action" type="button" data-file-share>Partager / Enregistrer</button></div><button class="quiet-action file-ready-close" type="button">Fermer</button></div>';
+      document.body.append(dialog);
+      $('[data-file-share]', dialog).addEventListener('click', async () => {
+        const file = dialog._shareFile;
+        if (!file || typeof navigator.share !== 'function') return;
+        try {
+          await navigator.share({ files: [file], title: 'Marge Studio', text: 'Fichier exporté depuis Marge Studio.' });
+        } catch (error) {
+          if (error.name !== 'AbortError') showToast('Le partage a échoué. Essayez le bouton Télécharger.', 'error');
+        }
+      });
+      $('.file-ready-close', dialog).addEventListener('click', () => dialog.close());
+      dialog.addEventListener('click', (event) => { if (event.target === dialog) dialog.close(); });
+    }
+
+    if (activeDownloadUrl) URL.revokeObjectURL(activeDownloadUrl);
+    activeDownloadUrl = URL.createObjectURL(blob);
+    const link = $('[data-file-download]', dialog);
+    link.href = activeDownloadUrl;
+    link.download = filename;
+    $('.file-ready-name', dialog).textContent = `${filename} · ${(blob.size / 1024).toFixed(1)} Ko`;
+
+    const file = new File([blob], filename, { type: blob.type || 'application/octet-stream' });
+    dialog._shareFile = file;
+    const shareButton = $('[data-file-share]', dialog);
+    let canShareFile = false;
+    try {
+      canShareFile = typeof navigator.share === 'function' && typeof navigator.canShare === 'function' && navigator.canShare({ files: [file] });
+    } catch (_) {}
+    shareButton.hidden = !canShareFile;
+
+    if (!dialog.open) {
+      if (typeof dialog.showModal === 'function') dialog.showModal();
+      else dialog.setAttribute('open', '');
+    }
+  }
+
   function downloadBlob(content, filename, mimeType) {
     const blob = content instanceof Blob ? content : new Blob([content], { type: mimeType });
+    const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+    if (isMobile) {
+      showFileReady(blob, filename);
+      return;
+    }
     const url = URL.createObjectURL(blob);
     const anchor = document.createElement('a');
     anchor.href = url;

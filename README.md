@@ -18,7 +18,7 @@ Ajoutez un client avec son nom, son numéro, sa ville et les tailles. Les taille
 
 Pour saisir plusieurs clients, collez des lignes tabulées, ou importez un `.xlsx` ou un `.csv`. Les quatre champs requis sont `Nom`, `Téléphone`, `Ville` et `Tailles`. Une cellule de tailles peut contenir plusieurs valeurs séparées par des virgules. Si elle contient le séparateur de colonnes du CSV (virgule ou point-virgule), entourez toute la cellule de guillemets pour que ses tailles restent dans une seule colonne. Les numéros et tailles sont conservés comme texte lors de l’export.
 
-Le classeur Excel contient une synthèse des villes, un répertoire complet trié par ville, les tailles détaillées par client, une analyse des tailles et un onglet distinct par ville. L’export des numéros télécharge uniquement les téléphones, un par ligne, en fichier `.txt`.
+Le classeur Excel contient une synthèse des villes, un répertoire complet trié par ville, les tailles détaillées par client, une analyse des tailles et un onglet distinct par ville. Il peut aussi être créé avant l’ajout de clients ; le classeur est alors vide. Sur téléphone, une fenêtre propose un lien « Télécharger » et, si le navigateur le prend en charge, le partage pour enregistrer le fichier dans l’app Fichiers. L’export des numéros télécharge uniquement les téléphones, un par ligne, en fichier `.txt`.
 
 ## Calculateur
 
