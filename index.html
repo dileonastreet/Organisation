@@ -4,18 +4,19 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#071523">
-  <meta name="description" content="Calculateur de prix de vente, TVA publicitaire et bénéfice net par quantité.">
-  <title>Marge Studio — Calculateur de prix de vente</title>
+  <meta name="description" content="Marge Studio : gestion des clients, tailles par ville et calculateur de prix de vente.">
+  <title>Marge Studio — Clients & calculateur</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="./styles.css">
+  <script src="./vendor/exceljs.min.js" defer></script>
   <script src="./app.js" defer></script>
 </head>
 <body>
   <div class="app-shell">
     <aside class="sidebar" aria-label="Navigation principale">
-      <a class="brand" href="#top" aria-label="Marge Studio, accueil">
+      <a class="brand" href="#overview" data-nav="overview" aria-label="Marge Studio, accueil">
         <span class="brand-mark" aria-hidden="true">
           <svg viewBox="0 0 48 48"><path d="M8 13.5A5.5 5.5 0 0 1 13.5 8h20L41 15.5v19a5.5 5.5 0 0 1-5.5 5.5h-22A5.5 5.5 0 0 1 8 34.5z"/><circle cx="31.5" cy="16.5" r="2.5"/><path d="M13 25h15v11H13zM16 28h2m4 0h2m-8 4h2m4 0h2"/></svg>
         </span>
@@ -23,107 +24,118 @@
       </a>
       <div class="nav-caption">ESPACE COMMERÇANT</div>
       <nav class="side-nav">
-        <a class="nav-link active" href="#calculator" aria-current="page">
-          <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="3" width="14" height="18" rx="2"/><path d="M8 7h8M8 11h2m4 0h2m-8 4h2m4 0h2m-8 3h2m4 0h2"/></svg>
-          <span>Calculateur</span>
+        <a class="nav-link" href="#overview" data-nav="overview">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m3 10 9-7 9 7v10a1 1 0 0 1-1 1h-5v-7H9v7H4a1 1 0 0 1-1-1z"/></svg><span>Vue d’ensemble</span>
         </a>
-        <a class="nav-link" href="#quantity-summary">
-          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7.5 12 3l8 4.5v9L12 21l-8-4.5z"/><path d="m4.5 7.8 7.5 4.4 7.5-4.4M12 12.2V21"/></svg>
-          <span>Synthèse des quantités</span>
+        <a class="nav-link" href="#calculatorView" data-nav="calculator">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="3" width="14" height="18" rx="2"/><path d="M8 7h8M8 11h2m4 0h2m-8 4h2m4 0h2m-8 3h2m4 0h2"/></svg><span>Calculateur</span>
+        </a>
+        <a class="nav-link active" href="#customerList" data-nav="clients" aria-current="page">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M16 20v-1.5a3.5 3.5 0 0 0-3.5-3.5h-6A3.5 3.5 0 0 0 3 18.5V20z"/><circle cx="9.5" cy="7.5" r="3.5"/><path d="M16 11a3.5 3.5 0 1 0 0-7m5 16v-1.5a3.5 3.5 0 0 0-3-3.46"/></svg><span>Clients</span>
+        </a>
+        <a class="nav-link" href="#citySummarySection" data-nav="cities">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 10c0 5-8 12-8 12S4 15 4 10a8 8 0 1 1 16 0Z"/><circle cx="12" cy="10" r="2.5"/></svg><span>Villes et tailles</span>
+        </a>
+        <a class="nav-link" href="#exportsPanel" data-nav="exports">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3h9l5 5v13H6a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2Z"/><path d="M14 3v6h6M8 14h8m-8 3h8"/></svg><span>Exports</span>
         </a>
       </nav>
-      <div class="sidebar-bottom">
-        <span class="sidebar-line"></span>
-        <p>LES CHIFFRES<br>CLAIRS.<br>LES DÉCISIONS<br>JUSTES.</p>
-      </div>
+      <div class="sidebar-bottom"><span class="sidebar-line"></span><p>PETITE BOUTIQUE.<br>GRANDES AMBITIONS.</p></div>
     </aside>
 
     <main class="main-content" id="top">
-      <header class="topbar">
-        <div class="topbar-label"><span class="live-dot"></span> Calcul en temps réel</div>
+      <header class="topbar" id="clientsTopbar">
+        <div class="topbar-label"><span class="live-dot"></span><span id="storageStatus">Données enregistrées dans ce navigateur</span></div>
         <div class="topbar-right">
-          <label class="currency-control" for="currency">
-            <span>Devise</span>
-            <select id="currency" aria-label="Choisir la devise">
-              <option value="MAD" selected>MAD — Dirham</option>
-              <option value="EUR">EUR — Euro</option>
-              <option value="USD">USD — Dollar</option>
-            </select>
-          </label>
-          <button class="icon-button" id="resetButton" type="button" title="Réinitialiser les valeurs" aria-label="Réinitialiser les valeurs">
-            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12a9 9 0 1 0 2.64-6.36L3 8"/><path d="M3 3v5h5"/><path d="M12 7v5l3 2"/></svg>
-          </button>
+          <button class="text-action" id="exportPhones" type="button"><span aria-hidden="true">⇩</span> Exporter les numéros</button>
+          <button class="primary-action" id="exportExcel" type="button"><span class="excel-mark" aria-hidden="true">X</span> Exporter le fichier Excel</button>
         </div>
       </header>
 
-      <section class="page-heading" id="calculator">
-        <div>
-          <div class="eyebrow"><span class="eyebrow-icon">↗</span> OUTIL DE MARGE COMMERCIALE</div>
-          <h1>Calculateur de <span>prix de vente</span></h1>
-          <p>Maîtrisez vos coûts. Fixez votre marge.</p>
-        </div>
-        <div class="example-badge"><span class="example-dot"></span> Valeurs d’exemple</div>
+      <section id="clientsView" class="workspace-view">
+        <section class="page-heading" id="overview">
+          <div><div class="eyebrow"><span class="eyebrow-icon">↗</span> VOTRE ESPACE CLIENTS</div><h1>Gestion des <span>clients</span></h1><p>Organisez votre clientèle, ville par ville.</p></div>
+          <div class="local-badge"><span class="live-dot"></span> Stockage local et privé</div>
+        </section>
+
+        <section class="crm-metrics" aria-label="Résumé des clients">
+          <article class="crm-metric"><span class="metric-icon people" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M16 20v-1.5a3.5 3.5 0 0 0-3.5-3.5h-6A3.5 3.5 0 0 0 3 18.5V20z"/><circle cx="9.5" cy="7.5" r="3.5"/><path d="M16 11a3.5 3.5 0 1 0 0-7m5 16v-1.5a3.5 3.5 0 0 0-3-3.46"/></svg></span><div><span>Clients enregistrés</span><strong id="totalCustomers">0</strong></div></article>
+          <article class="crm-metric"><span class="metric-icon pin" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M20 10c0 5-8 12-8 12S4 15 4 10a8 8 0 1 1 16 0Z"/><circle cx="12" cy="10" r="2.5"/></svg></span><div><span>Villes</span><strong id="cityCount">0</strong></div></article>
+          <article class="crm-metric"><span class="metric-icon shirt" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="m7 4 5 2 5-2 5 4-3 4-2-1v10H7V11l-2 1-3-4z"/></svg></span><div><span>Tailles suivies</span><strong id="sizeCount">0</strong></div></article>
+        </section>
+
+        <section class="crm-workgrid">
+          <div class="form-column">
+            <section class="panel crm-panel" id="customerFormPanel" aria-labelledby="customerFormTitle">
+              <div class="crm-panel-heading"><span class="crm-heading-icon add-person" aria-hidden="true">＋</span><div><h2 id="customerFormTitle">Ajouter un client</h2><p>Renseignez ses coordonnées et les tailles achetées.</p></div></div>
+              <form id="customerForm" novalidate>
+                <div class="form-field"><label for="customerName">Nom du client</label><input id="customerName" name="name" type="text" placeholder="Ex. : Sara El Amrani" autocomplete="name" required></div>
+                <div class="form-field"><label for="customerPhone">Téléphone</label><input id="customerPhone" name="phone" type="tel" inputmode="tel" placeholder="Ex. : +212 6 12 34 56 78" autocomplete="tel" dir="ltr" required></div>
+                <div class="form-field"><label for="customerCity">Ville</label><input id="customerCity" name="city" type="text" list="knownCities" placeholder="Ex. : Casablanca" autocomplete="address-level2" required><datalist id="knownCities"></datalist></div>
+                <div class="form-field"><label for="customerSizes">Tailles achetées</label><input id="customerSizes" name="sizes" type="text" placeholder="Ex. : 38, 40, M, XL" aria-describedby="sizesHint" required><p class="field-hint" id="sizesHint">Lettres ou chiffres, séparés par des virgules. Vous pouvez saisir vos propres tailles.</p></div>
+                <p class="form-feedback" id="customerFormMessage" aria-live="polite"></p>
+                <div class="form-actions"><button class="primary-action form-submit" id="customerSubmit" type="submit"><span aria-hidden="true">＋</span> Ajouter à la liste</button><button class="secondary-action" id="cancelEdit" type="button" hidden>Annuler</button></div>
+              </form>
+            </section>
+
+            <details class="panel import-panel" id="bulkImportPanel">
+              <summary><span class="import-summary-icon" aria-hidden="true">⇧</span><span><strong>Importer plusieurs clients</strong><small>Fichier Excel/CSV ou copier-coller</small></span><span class="summary-chevron" aria-hidden="true">⌄</span></summary>
+              <div class="import-content">
+                <label for="importFile" class="form-label">Importer un fichier Excel (.xlsx) ou CSV</label>
+                <input id="importFile" class="file-input" type="file" accept=".xlsx,.csv,text/csv,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet">
+                <p class="field-hint">Colonnes attendues : Nom, Téléphone, Ville, Tailles.</p>
+                <label for="bulkData" class="form-label">Ou coller plusieurs lignes</label>
+                <textarea id="bulkData" rows="4" placeholder="Nom&#9;Téléphone&#9;Ville&#9;Tailles&#10;Sara El Amrani&#9;+212 6 12 34 56 78&#9;Casablanca&#9;38, 40, M"></textarea>
+                <div class="import-actions"><button class="secondary-action" id="addBulk" type="button">Ajouter les lignes</button><button class="quiet-action" id="sampleBtn" type="button">Charger un exemple</button></div>
+              </div>
+            </details>
+          </div>
+
+          <section class="panel city-panel" id="citySummarySection" aria-labelledby="citySummaryTitle">
+            <div class="crm-panel-heading"><span class="crm-heading-icon city-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 20V11h4v9m2 0V5h4v15m2 0v-7h4v7M2 20h20"/></svg></span><div><h2 id="citySummaryTitle">Clients par ville</h2><p>Effectifs et tailles enregistrées.</p></div></div>
+            <div class="table-scroll city-table-scroll"><table class="crm-table city-table"><thead><tr><th scope="col">Ville</th><th scope="col">Clients</th><th scope="col">Tailles fréquentes</th></tr></thead><tbody id="citySummaryRows"></tbody></table></div>
+            <div class="empty-state" id="cityEmptyState">Les villes apparaîtront ici après l’ajout de clients.</div>
+          </section>
+        </section>
+
+        <section class="panel customer-list-panel" id="customerList" aria-labelledby="customerListTitle">
+          <div class="list-panel-heading"><div class="crm-panel-heading"><span class="crm-heading-icon list-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M16 20v-1.5a3.5 3.5 0 0 0-3.5-3.5h-6A3.5 3.5 0 0 0 3 18.5V20z"/><circle cx="9.5" cy="7.5" r="3.5"/><path d="M16 11a3.5 3.5 0 1 0 0-7m5 16v-1.5a3.5 3.5 0 0 0-3-3.46"/></svg></span><div><h2 id="customerListTitle">Liste des clients</h2><p>Recherchez et gérez vos fiches.</p></div></div>
+            <div class="list-filters"><label class="sr-only" for="cityFilter">Filtrer par ville</label><select id="cityFilter" aria-label="Filtrer par ville"><option value="">Toutes les villes</option></select><label class="sr-only" for="customerSearch">Rechercher un nom ou un numéro</label><div class="search-wrap"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></svg><input id="customerSearch" type="search" placeholder="Rechercher un nom ou un numéro"></div></div>
+          </div>
+          <div class="table-scroll customer-table-scroll"><table class="crm-table customer-table"><thead><tr><th scope="col">Nom</th><th scope="col">Téléphone</th><th scope="col">Ville</th><th scope="col">Tailles achetées</th><th scope="col"><span class="sr-only">Actions</span></th></tr></thead><tbody id="customerRows"></tbody></table></div>
+          <div class="empty-state" id="customerEmptyState">Aucun client pour le moment. Ajoutez une fiche ou importez plusieurs lignes.</div>
+        </section>
+
+        <section class="panel exports-panel" id="exportsPanel" aria-labelledby="exportsTitle">
+          <div class="crm-panel-heading"><span class="crm-heading-icon export-icon" aria-hidden="true">⇩</span><div><h2 id="exportsTitle">Exporter vos données</h2><p>Créez une sauvegarde ou copiez uniquement les téléphones.</p></div></div>
+          <div class="export-cards"><article><div><strong>Rapport Excel complet</strong><p>Résumé par ville, répertoire trié, analyse des tailles et un onglet par ville.</p></div><button class="primary-action" id="exportExcelSecondary" type="button"><span class="excel-mark" aria-hidden="true">X</span> Télécharger .xlsx</button></article><article><div><strong>Liste des numéros</strong><p>Un numéro par ligne, prêt à copier ou à sauvegarder en fichier texte.</p></div><button class="secondary-action" id="exportPhonesSecondary" type="button">Exporter les numéros</button></article></div>
+          <p class="privacy-note"><span aria-hidden="true">ⓘ</span> Les données restent dans ce navigateur. Le fichier Excel est nécessaire pour les transférer ou les sauvegarder ailleurs.</p>
+        </section>
+        <footer class="page-footer"><span>MARGE STUDIO</span><span>Vos clients et calculs restent dans ce navigateur.</span><span class="footer-accent">PETITE BOUTIQUE. GRANDES AMBITIONS.</span></footer>
       </section>
 
-      <section class="input-panel panel" aria-labelledby="inputs-title">
-        <div class="section-heading">
-          <div class="heading-icon settings-icon" aria-hidden="true">✳</div>
-          <div>
-            <h2 id="inputs-title">Paramètres par pièce</h2>
-            <p>Renseignez vos coûts et votre bénéfice cible.</p>
+      <section id="calculatorView" class="workspace-view" hidden>
+        <header class="topbar calculator-topbar">
+          <div class="topbar-label"><span class="live-dot"></span> Calcul en temps réel</div>
+          <div class="topbar-right"><label class="currency-control" for="currency"><span>Devise</span><select id="currency" aria-label="Choisir la devise"><option value="MAD" selected>MAD — Dirham</option><option value="EUR">EUR — Euro</option><option value="USD">USD — Dollar</option></select></label><button class="icon-button" id="resetButton" type="button" title="Réinitialiser les valeurs" aria-label="Réinitialiser les valeurs"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12a9 9 0 1 0 2.64-6.36L3 8"/><path d="M3 3v5h5"/><path d="M12 7v5l3 2"/></svg></button></div>
+        </header>
+        <section class="page-heading calculator-heading" id="calculator">
+          <div><div class="eyebrow"><span class="eyebrow-icon">↗</span> OUTIL DE MARGE COMMERCIALE</div><h1>Calculateur de <span>prix de vente</span></h1><p>Maîtrisez vos coûts. Fixez votre marge.</p></div><div class="example-badge"><span class="example-dot"></span> Valeurs d’exemple</div>
+        </section>
+        <section class="input-panel panel" aria-labelledby="inputs-title">
+          <div class="section-heading"><div class="heading-icon settings-icon" aria-hidden="true">✳</div><div><h2 id="inputs-title">Paramètres par pièce</h2><p>Renseignez vos coûts et votre bénéfice cible.</p></div><div class="vat-chip"><span class="vat-symbol">%</span><span>TVA sur la publicité <strong>20&nbsp;%</strong></span><span class="vat-divider"></span><span>TVA estimée <strong id="vatAmount">—</strong></span></div></div>
+          <div class="input-grid">
+            <div class="field-card"><div class="field-top"><span class="field-icon cube-icon" aria-hidden="true">◇</span><label for="purchaseCost">Achat en gros / pièce</label></div><div class="input-wrap"><input id="purchaseCost" type="number" min="0" step="0.01" inputmode="decimal" value="120" autocomplete="off"><span class="input-currency" data-currency>MAD</span></div></div>
+            <div class="field-card"><div class="field-top"><span class="field-icon ad-icon" aria-hidden="true">◖</span><label for="adCost">Publicité / commande <small>avant TVA</small></label></div><div class="input-wrap"><input id="adCost" type="number" min="0" step="0.01" inputmode="decimal" value="25" autocomplete="off"><span class="input-currency" data-currency>MAD</span></div></div>
+            <div class="field-card"><div class="field-top"><span class="field-icon delivery-icon" aria-hidden="true">▱</span><label for="deliveryCost">Livraison / pièce</label></div><div class="input-wrap"><input id="deliveryCost" type="number" min="0" step="0.01" inputmode="decimal" value="20" autocomplete="off"><span class="input-currency" data-currency>MAD</span></div></div>
+            <div class="field-card"><div class="field-top"><span class="field-icon profit-icon" aria-hidden="true">▥</span><label for="targetProfit">Bénéfice net souhaité</label></div><div class="input-wrap"><input id="targetProfit" type="number" min="0" step="0.01" inputmode="decimal" value="50" autocomplete="off"><span class="input-currency" data-currency>MAD</span></div></div>
           </div>
-          <div class="vat-chip"><span class="vat-symbol">%</span><span>TVA sur la publicité <strong>20&nbsp;%</strong></span><span class="vat-divider"></span><span>TVA estimée <strong id="vatAmount">—</strong></span></div>
-        </div>
-
-        <div class="input-grid">
-          <div class="field-card">
-            <div class="field-top"><span class="field-icon cube-icon" aria-hidden="true">◇</span><label for="purchaseCost">Achat en gros / pièce</label></div>
-            <div class="input-wrap"><input id="purchaseCost" type="number" min="0" step="0.01" inputmode="decimal" value="120" autocomplete="off"><span class="input-currency" data-currency>MAD</span></div>
-          </div>
-          <div class="field-card">
-            <div class="field-top"><span class="field-icon ad-icon" aria-hidden="true">◖</span><label for="adCost">Publicité / commande <small>avant TVA</small></label></div>
-            <div class="input-wrap"><input id="adCost" type="number" min="0" step="0.01" inputmode="decimal" value="25" autocomplete="off"><span class="input-currency" data-currency>MAD</span></div>
-          </div>
-          <div class="field-card">
-            <div class="field-top"><span class="field-icon delivery-icon" aria-hidden="true">▱</span><label for="deliveryCost">Livraison / pièce</label></div>
-            <div class="input-wrap"><input id="deliveryCost" type="number" min="0" step="0.01" inputmode="decimal" value="20" autocomplete="off"><span class="input-currency" data-currency>MAD</span></div>
-          </div>
-          <div class="field-card">
-            <div class="field-top"><span class="field-icon profit-icon" aria-hidden="true">▥</span><label for="targetProfit">Bénéfice net souhaité</label></div>
-            <div class="input-wrap"><input id="targetProfit" type="number" min="0" step="0.01" inputmode="decimal" value="50" autocomplete="off"><span class="input-currency" data-currency>MAD</span></div>
-          </div>
-        </div>
-        <p class="assumption-note"><span aria-hidden="true">ⓘ</span> Calcul basé sur une pièce par commande. La TVA de 20&nbsp;% s’applique uniquement au coût publicitaire.</p>
+          <p class="assumption-note"><span aria-hidden="true">ⓘ</span> Calcul basé sur une pièce par commande. La TVA de 20&nbsp;% s’applique uniquement au coût publicitaire.</p>
+        </section>
+        <section class="price-card" aria-live="polite" aria-atomic="true"><div class="price-orb" aria-hidden="true"><svg viewBox="0 0 48 48"><path d="M7 22V9a2 2 0 0 1 2-2h13l19 19a3 3 0 0 1 0 4L30 41a3 3 0 0 1-4 0L7 22Z"/><circle cx="16" cy="16" r="2.4"/></svg></div><div class="price-main"><div class="price-label">PRIX DE VENTE CONSEILLÉ / PIÈCE</div><div class="price-value"><span id="salePrice">—</span><span class="price-currency" data-currency>MAD</span></div></div><div class="price-divider"></div><div class="price-mini"><span>PUBLICITÉ HT</span><strong id="adBeforeVatResult">—</strong></div><div class="price-mini"><span>PUBLICITÉ TTC</span><strong id="adAfterVatResult">—</strong></div><div class="formula-box"><div class="formula-label"><span class="formula-symbol">∑</span> DÉTAIL DU CALCUL</div><p id="formulaText">—</p></div></section>
+        <section class="summary-panel panel" id="quantity-summary" aria-labelledby="summary-title"><div class="summary-header"><div class="summary-heading"><div class="heading-icon bars-icon" aria-hidden="true">▥</div><div><h2 id="summary-title">Projection par quantité</h2><p>Comparez vos ventes et bénéfices selon le volume.</p></div></div><button class="add-quantity" id="addQuantityButton" type="button"><span aria-hidden="true">＋</span> Ajouter une quantité</button></div><div class="table-scroll"><table class="quantity-table"><thead><tr><th scope="col">Quantité</th><th scope="col">Prix de vente</th><th scope="col">Pub. HT</th><th scope="col">Pub. TTC</th><th scope="col">Livraison</th><th scope="col">Coût total</th><th scope="col">Ventes totales</th><th scope="col">Bénéfice net</th><th scope="col"><span class="sr-only">Action</span></th></tr></thead><tbody id="quantityRows"></tbody></table></div><div class="summary-footer"><span class="footer-mark"></span> Le bénéfice affiché correspond au bénéfice cible saisi, avant éventuelles autres charges.</div></section>
+        <footer class="page-footer"><span>MARGE STUDIO</span><span>Le calculateur ne modifie pas les fiches clients.</span><button type="button" class="text-reset" id="resetLink">Réinitialiser les valeurs</button></footer>
       </section>
-
-      <section class="price-card" aria-live="polite" aria-atomic="true">
-        <div class="price-orb" aria-hidden="true"><svg viewBox="0 0 48 48"><path d="M7 22V9a2 2 0 0 1 2-2h13l19 19a3 3 0 0 1 0 4L30 41a3 3 0 0 1-4 0L7 22Z"/><circle cx="16" cy="16" r="2.4"/></svg></div>
-        <div class="price-main"><div class="price-label">PRIX DE VENTE CONSEILLÉ / PIÈCE</div><div class="price-value"><span id="salePrice">—</span><span class="price-currency" data-currency>MAD</span></div></div>
-        <div class="price-divider"></div>
-        <div class="price-mini"><span>PUBLICITÉ HT</span><strong id="adBeforeVatResult">—</strong></div>
-        <div class="price-mini"><span>PUBLICITÉ TTC</span><strong id="adAfterVatResult">—</strong></div>
-        <div class="formula-box"><div class="formula-label"><span class="formula-symbol">∑</span> DÉTAIL DU CALCUL</div><p id="formulaText">—</p></div>
-      </section>
-
-      <section class="summary-panel panel" id="quantity-summary" aria-labelledby="summary-title">
-        <div class="summary-header">
-          <div class="summary-heading">
-            <div class="heading-icon bars-icon" aria-hidden="true">▥</div>
-            <div><h2 id="summary-title">Projection par quantité</h2><p>Comparez vos ventes et bénéfices selon le volume.</p></div>
-          </div>
-          <button class="add-quantity" id="addQuantityButton" type="button"><span aria-hidden="true">＋</span> Ajouter une quantité</button>
-        </div>
-        <div class="table-scroll">
-          <table class="quantity-table">
-            <thead><tr>
-              <th scope="col">Quantité</th><th scope="col">Prix de vente</th><th scope="col">Pub. HT</th><th scope="col">Pub. TTC</th><th scope="col">Livraison</th><th scope="col">Coût total</th><th scope="col">Ventes totales</th><th scope="col">Bénéfice net</th><th scope="col"><span class="sr-only">Action</span></th>
-            </tr></thead>
-            <tbody id="quantityRows"></tbody>
-          </table>
-        </div>
-        <div class="summary-footer"><span class="footer-mark"></span> Le bénéfice affiché correspond au bénéfice cible saisi, avant éventuelles autres charges.</div>
-      </section>
-      <footer class="page-footer"><span>MARGE STUDIO</span><span>Vos calculs restent dans ce navigateur.</span><button type="button" class="text-reset" id="resetLink">Réinitialiser les valeurs</button></footer>
     </main>
   </div>
 </body>
